@@ -41,7 +41,6 @@ class _SearchScreenState extends State<SearchScreen> {
     Map<String, String>? passedCategory =
         ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
     String? passedCategoryName = passedCategory?['name'];
-    String? passedCategoryImage = passedCategory?['image'];
 
     List<ProductModel> productList = passedCategory == null
         ? productsProvider.products

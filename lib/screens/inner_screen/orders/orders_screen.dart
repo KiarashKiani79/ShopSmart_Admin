@@ -44,10 +44,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) {
-                  return const Divider(
-                      // thickness: 8,
-                      // color: Colors.red,
-                      );
+                  return const Divider();
                 },
               ));
   }

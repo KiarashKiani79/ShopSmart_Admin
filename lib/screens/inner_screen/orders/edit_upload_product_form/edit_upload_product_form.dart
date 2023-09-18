@@ -208,18 +208,18 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        localImagePicker();
-                      },
-                      child: const Text("Pick another image"),
-                    ),
-                    TextButton(
-                      onPressed: () {
                         removePickedImage();
                       },
                       child: const Text(
                         "Remove image",
                         style: TextStyle(color: Colors.red),
                       ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        localImagePicker();
+                      },
+                      child: const Text("Pick another image"),
                     ),
                   ],
                 )

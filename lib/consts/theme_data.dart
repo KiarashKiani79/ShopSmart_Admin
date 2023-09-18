@@ -46,9 +46,6 @@ SystemUiOverlayStyle statusBarTheme(ThemeProvider themeProvider) {
     statusBarColor: Colors.transparent,
     statusBarIconBrightness:
         themeProvider.getIsDarkTheme ? Brightness.light : Brightness.dark,
-    // systemNavigationBarColor:
-    //     themeProvider.getIsDarkTheme ? Colors.white : Colors.black,
-    // systemNavigationBarContrastEnforced: true,
   );
 }
 

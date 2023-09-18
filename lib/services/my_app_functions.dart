@@ -104,24 +104,6 @@ class MyAppFunctions {
                     ),
                     label: const Text("Gallery"),
                   ),
-                  TextButton.icon(
-                    onPressed: () {
-                      removeFCT();
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.remove_circle_outline,
-                      color: Colors.red,
-                    ),
-                    label: const Text(
-                      "Remove",
-                      style: TextStyle(
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
