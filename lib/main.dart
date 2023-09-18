@@ -8,6 +8,7 @@ import 'providers/theme_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/inner_screen/orders/orders_screen.dart';
 import 'screens/search_screen.dart';
+import 'screens/inner_screen/orders/edit_upload_product_form/edit_upload_product_form.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,8 @@ class MyApp extends StatelessWidget {
           routes: {
             OrdersScreen.routeName: (context) => const OrdersScreen(),
             SearchScreen.routeName: (context) => const SearchScreen(),
+            EditOrUploadProductScreen.routeName: (context) =>
+                const EditOrUploadProductScreen(),
           },
         );
       }),

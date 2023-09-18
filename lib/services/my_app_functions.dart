@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_iconly/flutter_iconly.dart';
 
 import '../widgets/subtitle_text.dart';
 import '../widgets/title_text.dart';
@@ -8,6 +9,7 @@ class MyAppFunctions {
   static Future<void> showErrorOrWarningDialog({
     required BuildContext context,
     required String subtitle,
+    String buttonText = "OK",
     bool isError = true,
     required Function fct,
   }) async {
@@ -15,12 +17,10 @@ class MyAppFunctions {
         context: context,
         builder: (context) {
           return AlertDialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.0)),
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // image
                 Image.asset(
                   isError ? AssetsManager.error : AssetsManager.warning,
                   height: 60,
@@ -29,42 +29,37 @@ class MyAppFunctions {
                 const SizedBox(
                   height: 16.0,
                 ),
+                // subtitle
                 SubtitleTextWidget(
                   label: subtitle,
                   fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(
-                  height: 16.0,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Visibility(
-                      visible: !isError,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const SubtitleTextWidget(
-                          label: "Cancel",
-                          color: Colors.green,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        fct();
-                        Navigator.pop(context);
-                      },
-                      child: const SubtitleTextWidget(
-                        label: "OK",
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                )
               ],
             ),
+            // buttons
+            actions: [
+              Visibility(
+                visible: !isError,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const SubtitleTextWidget(
+                    label: "Cancel",
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  fct();
+                  Navigator.pop(context);
+                },
+                child: SubtitleTextWidget(
+                  label: buttonText,
+                  color: Colors.red,
+                ),
+              ),
+            ],
           );
         });
   }
@@ -94,7 +89,7 @@ class MyAppFunctions {
                         Navigator.pop(context);
                       }
                     },
-                    icon: const Icon(Icons.camera),
+                    icon: const Icon(IconlyBold.camera),
                     label: const Text("Camera"),
                   ),
                   TextButton.icon(
@@ -105,7 +100,7 @@ class MyAppFunctions {
                       }
                     },
                     icon: const Icon(
-                      Icons.browse_gallery,
+                      IconlyBold.image,
                     ),
                     label: const Text("Gallery"),
                   ),
@@ -118,8 +113,14 @@ class MyAppFunctions {
                     },
                     icon: const Icon(
                       Icons.remove_circle_outline,
+                      color: Colors.red,
                     ),
-                    label: const Text("Remove"),
+                    label: const Text(
+                      "Remove",
+                      style: TextStyle(
+                        color: Colors.red,
+                      ),
+                    ),
                   ),
                 ],
               ),

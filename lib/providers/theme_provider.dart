@@ -9,6 +9,7 @@ class ThemeProvider with ChangeNotifier {
   ThemeProvider() {
     getTheme();
   }
+
   setDarkTheme({required bool themeValue}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool(THEME_STATUS, themeValue);

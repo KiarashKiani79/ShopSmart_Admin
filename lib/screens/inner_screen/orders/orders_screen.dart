@@ -33,6 +33,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 imagePath: AssetsManager.order,
                 title: "No orders has been placed yet",
                 subtitle: "",
+                buttonText: null,
               )
             : ListView.separated(
                 itemCount: 15,

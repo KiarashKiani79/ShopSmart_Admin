@@ -47,7 +47,7 @@ class _OrdersWidgetFreeState extends State<OrdersWidgetFree> {
                       IconButton(
                           onPressed: () {},
                           icon: const Icon(
-                            Icons.clear,
+                            Icons.remove_circle_outline,
                             color: Colors.red,
                             size: 22,
                           )),

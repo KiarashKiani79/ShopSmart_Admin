@@ -1,17 +1,17 @@
+import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 
 import '../consts/theme_data.dart';
 import '../models/product_model.dart';
 import '../providers/products_provider.dart';
 import '../providers/theme_provider.dart';
-import '../services/assets_manager.dart';
 import '../widgets/product_widget.dart';
 import '../widgets/title_text.dart';
-import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 
 class SearchScreen extends StatefulWidget {
-  static const routeName = '/SearchScreen';
+  static const routeName = "/search-screen";
   const SearchScreen({super.key});
 
   @override
@@ -20,7 +20,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   late TextEditingController searchTextController;
-
+  List<ProductModel> productListSearch = [];
   @override
   void initState() {
     searchTextController = TextEditingController();
@@ -33,58 +33,71 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  List<ProductModel> productListSearch = [];
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final productsProvider = Provider.of<ProductsProvider>(context);
-    String? passedCategory =
-        ModalRoute.of(context)!.settings.arguments as String?;
+
+    Map<String, String>? passedCategory =
+        ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
+    String? passedCategoryName = passedCategory?['name'];
+    String? passedCategoryImage = passedCategory?['image'];
+
     List<ProductModel> productList = passedCategory == null
         ? productsProvider.products
-        : productsProvider.findByCategory(categoryName: passedCategory);
+        : productsProvider.findByCategory(categoryName: passedCategoryName!);
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-          title: TitlesTextWidget(label: passedCategory ?? "Search products"),
+          title:
+              TitlesTextWidget(label: passedCategoryName ?? "Search Products"),
           systemOverlayStyle: statusBarTheme(themeProvider),
         ),
         body: productList.isEmpty
-            ? const Center(child: TitlesTextWidget(label: "No product found"))
+            ? const Center(
+                child: FittedBox(
+                  child: Column(
+                    children: [
+                      TitlesTextWidget(label: "No Product Found", fontSize: 22),
+                      Icon(
+                        Ionicons.sad_outline,
+                        size: 28,
+                      ),
+                    ],
+                  ),
+                ),
+              )
             : Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    const SizedBox(
-                      height: 15.0,
-                    ),
                     TextField(
                       controller: searchTextController,
                       decoration: InputDecoration(
+                        filled: true,
                         hintText: "Search",
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: GestureDetector(
-                          onTap: () {
-                            // setState(() {
-                            FocusScope.of(context).unfocus();
-                            searchTextController.clear();
-                            // });
-                          },
-                          child: const Icon(
-                            Icons.clear,
-                            color: Colors.red,
+                            onTap: () {
+                              searchTextController.clear();
+                              FocusScope.of(context).unfocus();
+                            },
+                            child: const Icon(Icons.clear)),
+                        border: const OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20.0),
                           ),
                         ),
                       ),
-                      // onChanged: (value) {
-                      //   setState(() {
-                      //     productListSearch = productsProvider.searchQuery(
-                      //         searchText: searchTextController.text);
-                      //   });
-                      // },
+                      onChanged: (value) {
+                        setState(() {
+                          productListSearch = productsProvider.searchQuery(
+                              searchText: searchTextController.text,
+                              passedList: productList);
+                        });
+                      },
                       onSubmitted: (value) {
                         setState(() {
                           productListSearch = productsProvider.searchQuery(
@@ -99,7 +112,18 @@ class _SearchScreenState extends State<SearchScreen> {
                     if (searchTextController.text.isNotEmpty &&
                         productListSearch.isEmpty) ...[
                       const Center(
-                        child: TitlesTextWidget(label: "No products found"),
+                        child: FittedBox(
+                          child: Column(
+                            children: [
+                              TitlesTextWidget(
+                                  label: "No Product Found", fontSize: 22),
+                              Icon(
+                                Ionicons.sad_outline,
+                                size: 28,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                     Expanded(
@@ -118,7 +142,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           );
                         },
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),

@@ -8,7 +8,8 @@ class SubtitleTextWidget extends StatelessWidget {
       this.fontStyle = FontStyle.normal,
       this.fontWeight = FontWeight.normal,
       this.color,
-      this.textDecoration = TextDecoration.none});
+      this.textDecoration = TextDecoration.none,
+      this.textAlign = TextAlign.start});
 
   final String label;
   final double fontSize;
@@ -16,6 +17,7 @@ class SubtitleTextWidget extends StatelessWidget {
   final FontWeight? fontWeight;
   final Color? color;
   final TextDecoration textDecoration;
+  final TextAlign textAlign;
   @override
   Widget build(BuildContext context) {
     return Text(
@@ -27,6 +29,7 @@ class SubtitleTextWidget extends StatelessWidget {
         color: color,
         fontStyle: fontStyle,
       ),
+      textAlign: textAlign,
     );
   }
 }
