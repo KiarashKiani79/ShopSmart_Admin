@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../consts/theme_data.dart';
 import '../models/product_model.dart';
 import '../providers/products_provider.dart';
+import '../providers/theme_provider.dart';
 import '../services/assets_manager.dart';
 import '../widgets/product_widget.dart';
 import '../widgets/title_text.dart';
@@ -34,6 +36,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<ProductModel> productListSearch = [];
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     final productsProvider = Provider.of<ProductsProvider>(context);
     String? passedCategory =
         ModalRoute.of(context)!.settings.arguments as String?;
@@ -46,13 +49,8 @@ class _SearchScreenState extends State<SearchScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset(
-              AssetsManager.shoppingCart,
-            ),
-          ),
           title: TitlesTextWidget(label: passedCategory ?? "Search products"),
+          systemOverlayStyle: statusBarTheme(themeProvider),
         ),
         body: productList.isEmpty
             ? const Center(child: TitlesTextWidget(label: "No product found"))
