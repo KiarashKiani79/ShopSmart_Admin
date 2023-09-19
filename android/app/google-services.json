@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "96230451410",
+    "project_id": "shop-smart-fd538",
+    "storage_bucket": "shop-smart-fd538.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96230451410:android:3f91c5017dc8246558a50b",
+        "android_client_info": {
+          "package_name": "com.example.shopsmart_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdX1Ydgbjld84ziC3LGeGtY7WhEvCcpq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96230451410:android:04d9dcb8e3b6ad4c58a50b",
+        "android_client_info": {
+          "package_name": "com.example.shopsmart_users"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdX1Ydgbjld84ziC3LGeGtY7WhEvCcpq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
