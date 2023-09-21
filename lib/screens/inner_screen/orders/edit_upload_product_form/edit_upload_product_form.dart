@@ -1,10 +1,16 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shopsmart_admin/consts/theme_data.dart';
+import 'package:shopsmart_admin/screens/dashboard_screen.dart';
+import 'package:shopsmart_admin/screens/loading_manager.dart';
+import 'package:uuid/uuid.dart';
 import '../../../../providers/theme_provider.dart';
 import '/consts/app_constants.dart';
 import '/models/product_model.dart';
@@ -31,8 +37,10 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
       _descriptionController,
       _quantityController;
   String? _categoryValue;
-  bool isEditing = false;
   String? productNetworkImage;
+  String? productImageUrl;
+  bool isEditing = false;
+  bool isLoading = false;
   @override
   void initState() {
     if (widget.productModel != null) {
@@ -77,18 +85,58 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
   }
 
   Future<void> _uploadProduct() async {
-    if (_pickedImage == null) {
-      MyAppFunctions.showErrorOrWarningDialog(
-        context: context,
-        subtitle: "Please pick up an image",
-        fct: () {},
-      );
-
-      return;
-    }
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
-    if (isValid) {}
+
+    if (_pickedImage == null) {
+      MyAppFunctions.showErrorOrWarningDialog(
+          context: context,
+          subtitle: "Please upload an image for your account.",
+          fct: () {});
+      return;
+    }
+
+    if (isValid) {
+      try {
+        setState(() {
+          isLoading = true;
+        });
+        final newProductId = const Uuid().v4();
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child("productsImages")
+            .child("${'${_titleController.text}/$newProductId'}.jpg");
+        await ref.putFile(File(_pickedImage!.path));
+        productImageUrl = await ref.getDownloadURL();
+        await FirebaseFirestore.instance
+            .collection("products")
+            .doc(newProductId)
+            .set({
+          'productId': newProductId,
+          'productTitle': _titleController.text,
+          'productPrice': _priceController.text,
+          'productCategory': _categoryValue,
+          'productDescription': _descriptionController.text,
+          'productImage': productImageUrl,
+          'productQuantity': _quantityController.text,
+          'createdAt': Timestamp.now(),
+        });
+        Fluttertoast.showToast(
+          msg: "Product uploaded successfully!",
+          backgroundColor: Colors.blue,
+        );
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, DashboardScreen.routeName);
+      } on FirebaseException catch (error) {
+        await MyAppFunctions.showErrorOrWarningDialog(
+            context: context, subtitle: error.message.toString(), fct: () {});
+      } catch (error) {
+        await MyAppFunctions.showErrorOrWarningDialog(
+            context: context, subtitle: error.toString(), fct: () {});
+      } finally {
+        isLoading = false;
+      }
+    }
   }
 
   Future<void> _editProduct() async {
@@ -129,141 +177,144 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final themeProvider = Provider.of<ThemeProvider>(context);
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
-        bottomSheet: bottomSheet(context, themeProvider),
-        appBar: AppBar(
-          centerTitle: true,
-          title: TitlesTextWidget(
-            label: isEditing ? "Edit Product" : "Upload a new product",
+    return LoadingManager(
+      isLoading: isLoading,
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Scaffold(
+          bottomSheet: bottomSheet(context, themeProvider),
+          appBar: AppBar(
+            centerTitle: true,
+            title: TitlesTextWidget(
+              label: isEditing ? "Edit Product" : "Upload a new product",
+            ),
+            systemOverlayStyle: statusBarTheme(themeProvider),
           ),
-          systemOverlayStyle: statusBarTheme(themeProvider),
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 20,
-              ),
-
-              // Image Picker
-              // Upload ImageUrl from Network
-              if (isEditing && productNetworkImage != null) ...[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    productNetworkImage!,
-                    height: size.width * 0.5,
-                    alignment: Alignment.center,
-                    fit: BoxFit.cover,
-                  ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: 20,
                 ),
-              ] else if (_pickedImage == null) ...[
-                // No image picked
-                SizedBox(
-                  width: size.width * 0.4 + 10,
-                  height: size.width * 0.4,
-                  child: GestureDetector(
-                    onTap: () => localImagePicker(),
-                    child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(20),
-                      color: Theme.of(context).colorScheme.primary,
-                      child: Center(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Icon(
-                              Icons.image_outlined,
-                              size: 80,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const Text("Pick Product Image"),
-                          ],
+
+                // Image Picker
+                // Upload ImageUrl from Network
+                if (isEditing && productNetworkImage != null) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      productNetworkImage!,
+                      height: size.width * 0.5,
+                      alignment: Alignment.center,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ] else if (_pickedImage == null) ...[
+                  // No image picked
+                  SizedBox(
+                    width: size.width * 0.4 + 10,
+                    height: size.width * 0.4,
+                    child: GestureDetector(
+                      onTap: () => localImagePicker(),
+                      child: DottedBorder(
+                        borderType: BorderType.RRect,
+                        radius: const Radius.circular(20),
+                        color: Theme.of(context).colorScheme.primary,
+                        child: Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Icon(
+                                Icons.image_outlined,
+                                size: 80,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const Text("Pick Product Image"),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ] else ...[
-                // Image picked from gallary or camera
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
-                    File(
-                      _pickedImage!.path,
+                ] else ...[
+                  // Image picked from gallary or camera
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      File(
+                        _pickedImage!.path,
+                      ),
+                      height: size.width * 0.5,
+                      alignment: Alignment.center,
                     ),
-                    height: size.width * 0.5,
-                    alignment: Alignment.center,
                   ),
-                ),
-              ],
-              if (_pickedImage != null || productNetworkImage != null) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        removePickedImage();
-                      },
-                      child: const Text(
-                        "Remove image",
-                        style: TextStyle(color: Colors.red),
+                ],
+                if (_pickedImage != null || productNetworkImage != null) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          removePickedImage();
+                        },
+                        child: const Text(
+                          "Remove image",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          localImagePicker();
+                        },
+                        child: const Text("Pick another image"),
+                      ),
+                    ],
+                  )
+                ],
+
+                const SizedBox(height: 25),
+
+                SizedBox(
+                  width: size.width * 0.5,
+                  child: DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      // filled: true,
+                      labelText: "Choose a Category",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        localImagePicker();
-                      },
-                      child: const Text("Pick another image"),
-                    ),
-                  ],
-                )
-              ],
-
-              const SizedBox(height: 25),
-
-              SizedBox(
-                width: size.width * 0.5,
-                child: DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    // filled: true,
-                    labelText: "Choose a Category",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
+                    value: _categoryValue,
+                    items: AppConstants.categoriesDropDownList,
+                    onChanged: (String? value) {
+                      setState(() {
+                        _categoryValue = value;
+                      });
+                    },
                   ),
-                  value: _categoryValue,
-                  items: AppConstants.categoriesDropDownList,
-                  onChanged: (String? value) {
-                    setState(() {
-                      _categoryValue = value;
-                    });
-                  },
                 ),
-              ),
 
-              const SizedBox(height: 25),
+                const SizedBox(height: 25),
 
-              // Form Fields
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                child: FormFields(
-                  formKey: _formKey,
-                  titleController: _titleController,
-                  priceController: _priceController,
-                  quantityController: _quantityController,
-                  descriptionController: _descriptionController,
+                // Form Fields
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  child: FormFields(
+                    formKey: _formKey,
+                    titleController: _titleController,
+                    priceController: _priceController,
+                    quantityController: _quantityController,
+                    descriptionController: _descriptionController,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: kBottomNavigationBarHeight + 10),
-            ],
+                const SizedBox(height: kBottomNavigationBarHeight + 10),
+              ],
+            ),
           ),
         ),
       ),

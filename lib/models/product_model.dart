@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ProductModel with ChangeNotifier {
@@ -8,6 +9,7 @@ class ProductModel with ChangeNotifier {
       productDescription,
       productImage,
       productQuantity;
+  Timestamp? createdAt;
 
   ProductModel({
     required this.productId,
@@ -17,5 +19,6 @@ class ProductModel with ChangeNotifier {
     required this.productDescription,
     required this.productImage,
     required this.productQuantity,
+    this.createdAt,
   });
 }

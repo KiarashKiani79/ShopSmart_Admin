@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -23,30 +24,58 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) {
-          return ThemeProvider();
-        }),
-        ChangeNotifierProvider(create: (_) {
-          return ProductsProvider();
-        }),
-      ],
-      child: Consumer<ThemeProvider>(builder: (context, themeProvider, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Shop Smart Admin',
-          theme: Styles.themeData(
-              isDarkTheme: themeProvider.getIsDarkTheme, context: context),
-          home: const DashboardScreen(),
-          routes: {
-            OrdersScreen.routeName: (context) => const OrdersScreen(),
-            SearchScreen.routeName: (context) => const SearchScreen(),
-            EditOrUploadProductScreen.routeName: (context) =>
-                const EditOrUploadProductScreen(),
-          },
-        );
-      }),
-    );
+    return FutureBuilder<FirebaseApp>(
+        future: Firebase.initializeApp(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const MaterialApp(
+              home: Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              debugShowCheckedModeBanner: false,
+            );
+          }
+          if (snapshot.hasError) {
+            return MaterialApp(
+              home: Scaffold(
+                body: Center(
+                  child: SelectableText(snapshot.error.toString()),
+                ),
+              ),
+              debugShowCheckedModeBanner: false,
+            );
+          }
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) {
+                return ThemeProvider();
+              }),
+              ChangeNotifierProvider(create: (_) {
+                return ProductsProvider();
+              }),
+            ],
+            child: Consumer<ThemeProvider>(
+                builder: (context, themeProvider, child) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'Shop Smart Admin',
+                theme: Styles.themeData(
+                    isDarkTheme: themeProvider.getIsDarkTheme,
+                    context: context),
+                home: const DashboardScreen(),
+                routes: {
+                  DashboardScreen.routeName: (context) =>
+                      const DashboardScreen(),
+                  OrdersScreen.routeName: (context) => const OrdersScreen(),
+                  SearchScreen.routeName: (context) => const SearchScreen(),
+                  EditOrUploadProductScreen.routeName: (context) =>
+                      const EditOrUploadProductScreen(),
+                },
+              );
+            }),
+          );
+        });
   }
 }
