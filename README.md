@@ -1,16 +1,38 @@
-# shopsmart_admin
+# Shop Smart Admin Panel
 
-A new Flutter project.
+Welcome to the admin panel for Shop Smart, your one-stop solution for managing products efficiently.
+
+## Features
+
+- **Dashboard Screen:** Get an overview of your products and sales.
+- **Upload Product:** Easily add new products to your store.
+- **Edit Product:** Update product details and images.
+- **Product Image Widget:** A dynamic widget for uploading and displaying product images.
+- **Firebase Integration:** Seamlessly store and manage your products with Firebase Firestore and Storage.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. Clone this repository to your local machine.
+2. Ensure you have Flutter installed.
+3. Configure Firebase for your project by adding your configuration files.
+4. Update the dependencies in your `pubspec.yaml` file.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```yaml
+dependencies:
+  cloud_firestore: ^4.9.2
+  cupertino_icons: ^1.0.2
+  dotted_border: ^2.0.0+3
+  dynamic_height_grid_view: ^0.0.3
+  fancy_shimmer_image: ^2.0.3
+  firebase_core: ^2.16.0
+  firebase_storage: ^11.2.7
+  flutter:
+    sdk: flutter
+  flutter_iconly: ^1.0.2
+  fluttertoast: ^8.2.2
+  image_picker: ^1.0.4
+  ionicons: ^0.2.2
+  provider: ^6.0.5
+  shared_preferences: ^2.2.1
+  shimmer: ^3.0.0
+  uuid: ^4.0.0
