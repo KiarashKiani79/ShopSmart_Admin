@@ -36,7 +36,8 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final productsProvider = Provider.of<ProductsProvider>(context);
+    final productsProvider =
+        Provider.of<ProductsProvider>(context, listen: false);
 
     Map<String, String>? passedCategory =
         ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
@@ -57,11 +58,8 @@ class _SearchScreenState extends State<SearchScreen> {
             stream: productsProvider.fetchProductsStream(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const MaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  home: Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                return const Center(
+                  child: CircularProgressIndicator(),
                 );
               } else if (snapshot.hasError) {
                 return Center(
