@@ -105,7 +105,7 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
         final ref = FirebaseStorage.instance
             .ref()
             .child("productsImages")
-            .child("${'${_titleController.text}/$newProductId'}.jpg");
+            .child("${'${_titleController.text}----$newProductId'}.jpg");
         await ref.putFile(File(_pickedImage!.path));
         productImageUrl = await ref.getDownloadURL();
         await FirebaseFirestore.instance
@@ -142,6 +142,7 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
   Future<void> _editProduct() async {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
+
     if (_pickedImage == null && productNetworkImage == null) {
       MyAppFunctions.showErrorOrWarningDialog(
         context: context,
@@ -150,7 +151,51 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
       );
       return;
     }
-    if (isValid) {}
+
+    if (isValid) {
+      try {
+        setState(() {
+          isLoading = true;
+        });
+
+        if (_pickedImage != null) {
+          final ref = FirebaseStorage.instance
+              .ref()
+              .child("productsImages")
+              .child("${widget.productModel!.productId}.jpg");
+          await ref.putFile(File(_pickedImage!.path));
+          productImageUrl = await ref.getDownloadURL();
+        }
+
+        await FirebaseFirestore.instance
+            .collection("products")
+            .doc(widget.productModel!.productId)
+            .update({
+          'productId': widget.productModel!.productId,
+          'productTitle': _titleController.text,
+          'productPrice': _priceController.text,
+          'productCategory': _categoryValue,
+          'productDescription': _descriptionController.text,
+          'productImage': productImageUrl ?? productNetworkImage,
+          'productQuantity': _quantityController.text,
+          'createdAt': widget.productModel!.createdAt,
+        });
+        Fluttertoast.showToast(
+          msg: "Product edited successfully!",
+          backgroundColor: Colors.blue,
+        );
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, DashboardScreen.routeName);
+      } on FirebaseException catch (error) {
+        await MyAppFunctions.showErrorOrWarningDialog(
+            context: context, subtitle: error.message.toString(), fct: () {});
+      } catch (error) {
+        await MyAppFunctions.showErrorOrWarningDialog(
+            context: context, subtitle: error.toString(), fct: () {});
+      } finally {
+        isLoading = false;
+      }
+    }
   }
 
   Future<void> localImagePicker() async {

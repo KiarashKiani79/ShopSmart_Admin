@@ -53,21 +53,37 @@ class _SearchScreenState extends State<SearchScreen> {
               TitlesTextWidget(label: passedCategoryName ?? "Search Products"),
           systemOverlayStyle: statusBarTheme(themeProvider),
         ),
-        body: productList.isEmpty
-            ? const Center(
-                child: FittedBox(
-                  child: Column(
-                    children: [
-                      TitlesTextWidget(label: "No Product Found", fontSize: 22),
-                      Icon(
-                        Ionicons.sad_outline,
-                        size: 28,
-                      ),
-                    ],
+        body: StreamBuilder<List<ProductModel>>(
+            stream: productsProvider.fetchProductsStream(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  home: Center(
+                    child: CircularProgressIndicator(),
                   ),
-                ),
-              )
-            : Padding(
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: SelectableText(snapshot.error.toString()),
+                );
+              } else if (snapshot.data == null) {
+                return const Center(
+                  child: FittedBox(
+                    child: Column(
+                      children: [
+                        TitlesTextWidget(
+                            label: "No products has been added", fontSize: 22),
+                        Icon(
+                          Ionicons.sad_outline,
+                          size: 28,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
@@ -144,7 +160,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     )
                   ],
                 ),
-              ),
+              );
+            }),
       ),
     );
   }

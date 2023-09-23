@@ -12,6 +12,7 @@ class Styles {
     return ThemeData(
       useMaterial3: true,
       primaryColorLight: const Color.fromARGB(255, 94, 75, 236),
+      indicatorColor: Colors.red,
       primaryColorDark: const Color(0xFFF7F1FB),
       scaffoldBackgroundColor: isDarkTheme
           ? AppColors.darkScaffoldColor
