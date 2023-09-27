@@ -7,17 +7,18 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:shopsmart_admin/consts/theme_data.dart';
-import 'package:shopsmart_admin/screens/dashboard_screen.dart';
-import 'package:shopsmart_admin/screens/loading_manager.dart';
+import '/consts/theme_data.dart';
+import '/screens/dashboard_screen.dart';
+import '/screens/loading_manager.dart';
 import 'package:uuid/uuid.dart';
-import '../../../../providers/theme_provider.dart';
+import '/providers/theme_provider.dart';
+import '/providers/products_provider.dart';
 import '/consts/app_constants.dart';
 import '/models/product_model.dart';
 import '/services/my_app_functions.dart';
 
 import './form_fields.dart';
-import '../../../../widgets/title_text.dart';
+import '/widgets/title_text.dart';
 
 class EditOrUploadProductScreen extends StatefulWidget {
   static const routeName = '/EditOrUploadProductScreen';
@@ -84,6 +85,7 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
     });
   }
 
+// Upload Product
   Future<void> _uploadProduct() async {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
@@ -139,6 +141,7 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
     }
   }
 
+// Edit Product
   Future<void> _editProduct() async {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
@@ -182,7 +185,7 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
         });
         Fluttertoast.showToast(
           msg: "Product edited successfully!",
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.green,
         );
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, DashboardScreen.routeName);
@@ -218,10 +221,12 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
     );
   }
 
+// ********************** Build **********************
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final productProvider = Provider.of<ProductsProvider>(context);
     return LoadingManager(
       isLoading: isLoading,
       child: GestureDetector(
@@ -357,6 +362,40 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
                   ),
                 ),
 
+                const SizedBox(height: 25),
+                isEditing
+                    ? ElevatedButton.icon(
+                        icon: const Icon(Icons.delete),
+                        label: const Text("Delete The Product"),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.red),
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                            themeProvider.getIsDarkTheme
+                                ? Colors.black
+                                : Colors.white,
+                          ),
+                        ),
+                        onPressed: () {
+                          MyAppFunctions.showErrorOrWarningDialog(
+                            isError: false,
+                            context: context,
+                            subtitle: "Delete the product permanently?",
+                            buttonText: "Delete",
+                            fct: () async {
+                              productProvider
+                                  .removeProduct(
+                                      productId: widget.productModel!.productId)
+                                  .then(
+                                    (value) => Navigator.pushReplacementNamed(
+                                        context, DashboardScreen.routeName),
+                                  );
+                            },
+                          );
+                        },
+                      )
+                    : Container(),
+
                 const SizedBox(height: kBottomNavigationBarHeight + 10),
               ],
             ),
@@ -373,32 +412,24 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
       child: Material(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: Row(
-          // mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Flexible(
               flex: 1,
               fit: FlexFit.tight,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(12),
-                    backgroundColor: Colors.red,
-                    elevation: 4,
+                child: OutlinedButton.icon(
+                  style: ButtonStyle(
+                    padding:
+                        MaterialStateProperty.all(const EdgeInsets.all(12)),
                   ),
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.clear_rounded,
-                    color: themeProvider.getIsDarkTheme
-                        ? Colors.black
-                        : Colors.white,
                   ),
-                  label: Text(
+                  label: const Text(
                     "Clear",
                     style: TextStyle(
                       fontSize: 20,
-                      color: themeProvider.getIsDarkTheme
-                          ? Colors.black
-                          : Colors.white,
                     ),
                   ),
                   onPressed: () {
